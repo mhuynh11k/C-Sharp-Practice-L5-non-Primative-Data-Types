@@ -7,32 +7,38 @@
 /* Think about how players progress in a typical RPG game. Consider what actions a player can take and how they affect the player's attributes. */
 public class Player
 {
-    public string Name { get;  set; }
-    public int Level { get;  set; }
-    public int HP { get;  set; }
-    public int XP { get;  set; }
+    public string Name { get; set; }
+    public int Level { get; set; }
+    public int HP { get; set; }
+    public int MaxHP { get; private set; }
+    public int XP { get; set; }
+    public int MaxXP { get; private set; }
 
     public Player(string name)
     {
         Name = name;
         Level = 1;
-        HP = 100;
+        MaxHP = 100;
+        HP = MaxHP;
         XP = 0;
+        MaxXP = 100;
     }
 
     // Method to level up the player
     public void LevelUp()
     {
         Level++;
-        HP += 20; // Increase HP by 20 for each level up
-        Console.WriteLine($"{Name} leveled up to level {Level}!");
+        MaxHP += 20; // Increase max HP by 20 for each level up
+        HP = Math.Min(HP + 20, MaxHP);
+        MaxXP = (int)(MaxHP * 1.5); // Increase XP required for the next level
+        Console.WriteLine($"{Name} leveled up to level {Level}! Max HP is now {MaxHP} and next level needs {MaxXP} XP.");
     }
 
     // Method to heal the player
     public void Heal(int amount)
     {
         HP += amount;
-        if (HP > 100) HP = 100; // Cap HP at 100
+        if (HP > MaxHP) HP = MaxHP; // Cap HP at current max HP
         Console.WriteLine($"{Name} healed for {amount} HP. Current HP: {HP}");
     }
 
@@ -40,12 +46,12 @@ public class Player
     public void GainXP(int amount)
     {
         XP += amount;
-        Console.WriteLine($"{Name} gained {amount} XP. Current XP: {XP}");
-        if (XP >= 100) // Level up for every 100 XP
+        while (XP >= MaxXP)
         {
-            XP -= 100; // Reset XP after leveling up
+            XP -= MaxXP;
             LevelUp();
         }
+        Console.WriteLine($"{Name} gained {amount} XP. Current XP: {XP}/{MaxXP}");
     }
 }
 //---------------------------------------------------------------------
@@ -289,9 +295,11 @@ class Program
 {
     static void Main()
     {
+
+        
         // Create a player object and set the name to Hero.
         Player player = new Player("Hero");
-        Console.WriteLine($"Created player: {player.Name}, Level {player.Level}, HP {player.HP}, XP {player.XP}");
+        Console.WriteLine($"Created player: {player.Name}, Level {player.Level}, HP {player.HP}/{player.MaxHP}, XP {player.XP}/{player.MaxXP}");
 
         // Heal the player by 10 points. The Heal method also prints the new HP.
         player.Heal(10);
@@ -300,7 +308,7 @@ class Program
         player.GainXP(50);
 
         // Give the player another 60 experience points, enough to level up.
-        player.GainXP(60);
+        player.GainXP(500);
 
         // Create a health potion with healing power and quantity.
         Potion potion = new Potion("Health Potion", 25, 2);
@@ -350,7 +358,7 @@ class Program
         Console.WriteLine($"After spell, {goblin.Name} HP is {goblin.HP}.");
 
         // Show the player's final stats at the end of the program.
-        Console.WriteLine($"Final player stats: Level {player.Level}, HP {player.HP}, XP {player.XP}");
+        Console.WriteLine($"Final player stats: Level {player.Level}, HP {player.HP}/{player.MaxHP}, XP {player.XP}/{player.MaxXP}");
 
         // Keep the console open until the user presses Enter.
         Console.WriteLine("Press Enter to exit...");
